@@ -7,10 +7,15 @@ import android.widget.EditText
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.apache.commons.io.FileUtils
+import java.io.File
+import java.io.IOException
+import java.nio.charset.Charset
+import java.nio.file.Files
 
 class MainActivity : AppCompatActivity() {
 
-    val listOfTasks = mutableListOf<String>()
+    var listOfTasks = mutableListOf<String>()
     lateinit var adapter : TaskItemAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,11 +29,12 @@ class MainActivity : AppCompatActivity() {
 
                 // 2. Notify the adapter that our data set has changed
                 adapter.notifyDataSetChanged()
+
+                saveItems()
             }
         }
 
-        listOfTasks.add("Do laundry")
-        listOfTasks.add("Go to the bank")
+        loadItems()
 
         // Lookup RecyclerView in the layout
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
@@ -62,8 +68,36 @@ class MainActivity : AppCompatActivity() {
             // 3. Reset text field
             inputTextField.setText("")
 
+            saveItems()
+
         }
+    }
 
+    // Save the data the user has inputted
+    // Save data by writing and reading from the file
 
+    // Get the data file we need
+    fun getDataFile() : File {
+
+        // Every line represents a specific task in our list of tasks
+        return File(filesDir, "data.txt")
+    }
+
+    // Load the items by reading every line in the file
+    fun loadItems() {
+        try {
+            listOfTasks = FileUtils.readLines(getDataFile(), Charset.defaultCharset())
+        } catch (ioException: IOException) {
+            ioException.printStackTrace()
+        }
+    }
+
+    // Save items by writing each element in the list to a line in the file
+    fun saveItems() {
+        try {
+            FileUtils.writeLines(getDataFile(), listOfTasks)
+        } catch (ioException: IOException) {
+            ioException.printStackTrace()
+        }
     }
 }
